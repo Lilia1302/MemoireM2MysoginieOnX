@@ -5,18 +5,23 @@ from datetime import datetime
 from configparser import ConfigParser
 from random import randint
 import httpx
+import os
 
 MINIMUM_TWEETS = 1000
-
-#periods to scrap
+# Périodes à scraper
 QUERY_PERIODS = [
-   ("#LaManada -filter:retweets (lang:es)", "2018-04-01", "2018-06-30"),
-   ("#LaManada -filter:retweets (lang:es)", "2019-06-01", "2019-06-30"),
-    
+    ("La Manada", "2016-07-08", "2016-07-09"),
+    ("La Manada", "2017-11-15", "2017-11-30"),
+    ("La Manada", "2018-04-01", "2018-06-30"),
+    ("La Manada", "2019-06-01", "2019-06-30"),
 ]
 
+# Hashtags et expressions clés à surveiller
+KEYWORDS = [
+    "#LaManada", "#lamanada", "#Stopfeminazism", "#stopradicalfeminism", "#yonotecreo", "\"La Manada\""
+]
 async def get_tweets(tweets, query, since, until):
-    search_query = f"{query} since:{since} until:{until}"
+    search_query = f"({' OR '.join(KEYWORDS)}) {query} -filter:retweets lang:es since:{since} until:{until}"
     
     if tweets is None:
         print(f'{datetime.now()} - Getting tweets for {since} to {until}...')
@@ -39,7 +44,7 @@ async def get_tweets(tweets, query, since, until):
 
 #download config
 config = ConfigParser()
-config.read('config.ini')
+config.read(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\LaManada\config.ini")
 username = config['X']['username']
 email = config['X']['email']
 password = config['X']['password']
@@ -59,7 +64,7 @@ def save_tweets_to_file(tweets, filename='tweets_twikit_multi_periods_part2.json
 
 async def main():
     print('Logged in')
-    client.load_cookies('cookies.json')
+    client.load_cookies(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\LaManada\cookies.json")
 
     for query, since, until in QUERY_PERIODS:
         tweet_count = 0
