@@ -11,16 +11,7 @@ MINIMUM_TWEETS = 1000
 #periods to scrap
 QUERY_PERIODS = [
     # Période 1 : jugement
-    ("#LaManada -filter:retweets (lang:es)", "2018-04-18", "2018-05-17"),
-    ("la manada -filter:retweets (lang:es)", "2018-04-18", "2018-05-17"),
-    ("(#YoSiTeCreo OR #NoEsNo OR #NosotrasSomosLaManada OR #NoEstásSola OR #JusticiaPatriarcal) #LaManada -filter:retweets (lang:es)", "2018-04-18", "2018-05-17"),
-    ("(#Stopfeminazism OR #StopRadicalFeminism OR #YoNoTeCreo OR 'denuncia falsa' OR mentirosa OR feminazi OR 'se lo buscó') #LaManada -filter:retweets (lang:es)", "2018-04-18", "2018-05-17"),
-
-    # Période 2 : libération
-    ("#LaManada -filter:retweets (lang:es)", "2018-06-14", "2018-06-27"),
-    ("la manada -filter:retweets (lang:es)", "2018-06-14", "2018-06-27"),
-    ("(#YoSiTeCreo OR #NoEsNo OR #NosotrasSomosLaManada OR #NoEstásSola OR #JusticiaPatriarcal) #LaManada -filter:retweets (lang:es)", "2018-06-14", "2018-06-27"),
-    ("(#Stopfeminazism OR #StopRadicalFeminism OR #YoNoTeCreo OR 'denuncia falsa' OR mentirosa OR feminazi OR 'se lo buscó') #LaManada -filter:retweets (lang:es)", "2018-06-14", "2018-06-27")
+    ("#Mazan lang:fr -filter:retweets", "2024-04-18", "2024-12-17")
 ]
 
 async def get_tweets(tweets, query, since, until):
@@ -55,7 +46,7 @@ password = config['X']['password']
 client = Client(language='fr-FR')
 
 #continuous saving
-def save_tweets_to_file(tweets, filename='tweets_twikit_multi_periods_part2.json'):
+def save_tweets_to_file(tweets, filename='Mazan_Tweets_.json'):
     try:
         with open(filename, 'a', encoding='utf-8') as json_file:
             for tweet in tweets:
