@@ -1,0 +1,21 @@
+import pandas as pd
+
+# Charger les 4 fichiers harmonisés
+df_metwo = pd.read_csv( r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\BERT\fineTunning\cleanedDatasets\MeTwoText_clean.csv")
+df_spanish = pd.read_csv(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\BERT\fineTunning\cleanedDatasets\clean_spanish_hate_speech.csv")
+df_fr_hf = pd.read_csv(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\BERT\fineTunning\cleanedDatasets\clean_french_hate_speech.csv")
+df_edos = pd.read_csv(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\BERT\fineTunning\cleanedDatasets\edos_hate_speech.csv")
+
+# Vérification : ils doivent tous avoir les colonnes ['id', 'text', 'label', 'langue']
+colonnes_attendues = ["text", "label", "langue"]
+
+for name, df in zip(["MeToo", "Spanish", "fr_hf", "EDOS"], [df_metwo, df_spanish, df_fr_hf, df_edos]):
+    if not all(col in df.columns for col in colonnes_attendues):
+        raise ValueError(f"Le dataset {name} ne contient pas toutes les colonnes requises : {colonnes_attendues}")
+
+# Concaténer les 4 datasets
+df_total = pd.concat([df_metwo, df_spanish, df_fr_hf, df_edos], ignore_index=True)
+
+# Sauvegarde dans un fichier CSV unique
+df_total.to_csv("dataset_total_harmonised.csv", index=False)
+print("✅ Fusion terminée : dataset_total_harmonised.csv")
