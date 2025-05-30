@@ -1,58 +1,42 @@
+import json
 import pandas as pd
 import re
+import string
 
-# === Étape 1 : Charger les fichiers JSON ===
-fichiers_json = [
-    r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\MISOGYNIE_MAZAN_2024-12-10_2024-12-20_tweets.json",
-    r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\MISOGYNIE_MAZAN_2025-01-07_2025-01-15_tweets.json",
-    r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\MISOGYNIE_MAZAN_2025-02-25_2025-03-05_tweets.json",
-    r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\MAZAN_MENTIONS_2024-09-15_2025-03-15_tweets.json"
-]
+# === 1. Charger le fichier JSONL ===
+input_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/Mazan_Tweets_part2.json"
 
-df_list = [pd.read_json(f, lines=True) for f in fichiers_json]
-df = pd.concat(df_list, ignore_index=True)
+with open(input_path, "r", encoding="utf-8") as f:
+    tweets = [json.loads(line) for line in f if line.strip()]  # JSONL : 1 tweet par ligne
 
-# === Étape 2 : Supprimer les colonnes RGPD ===
-colonnes_rgpd = ['username', 'user_id', 'location', 'id']
-df = df.drop(columns=[col for col in colonnes_rgpd if col in df.columns], errors='ignore')
+# === 2. Créer un DataFrame ===
+df = pd.DataFrame(tweets)
 
-# === Étape 3 : Supprimer les tweets vides ===
-df = df.dropna(subset=['text'])
+# === 3. Supprimer les doublons basés sur la colonne "text" ===
+if "text" in df.columns:
+    df = df.drop_duplicates(subset="text")
 
-# === Étape 4 : Nettoyage du texte ===
+# === 4. Nettoyer le texte pour BERT/RoBERTa ===
 def clean_text(text):
-    text = re.sub(r'@\w+', '', text)
-    text = re.sub(r'http\S+', '', text)
-    text = re.sub(r'#\S+', '', text)
-    text = re.sub(r'[^a-zA-ZÀ-ÿ0-9\s]', '', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip().lower()
+    text = text.lower()
+    text = re.sub(r"http\S+", "", text)                     # supprimer les liens
+    text = re.sub(r"@\w+", "", text)                         # supprimer les mentions @
+    text = re.sub(r"#", "", text)                            # enlever '#' mais garder le mot
+    text = text.translate(str.maketrans("", "", string.punctuation))  # enlever ponctuation
+    text = re.sub(r"\s+", " ", text).strip()                # enlever espaces multiples
+    return text
 
-df['cleaned_text'] = df['text'].apply(clean_text)
+if "text" in df.columns:
+    df["clean_text"] = df["text"].apply(clean_text)
 
-# === Étape 5 : Détection de misogynie via mots-clés ===
-mots_misogynes = [
-    "pute", "pétasse", "sal*pe", "tapin", "viol collectif", "victime elle ment",
-    "elle l’a cherché", "tournée comme une chienne", "grosse pute",
-    "fausse victime", "méritait", "main au cul", "daronne", "enfant de viol"
-]
+# === 5. Supprimer les colonnes inutiles si elles existent ===
+colonnes_a_supprimer = ["user", "quoted-post", "replying-to", "pictures", "videos", "gifs", "link"]
+colonnes_existantes = [col for col in colonnes_a_supprimer if col in df.columns]
+if colonnes_existantes:
+    df = df.drop(columns=colonnes_existantes)
 
-def detect_misogyny(text):
-    return any(mot in text for mot in mots_misogynes)
+# === 6. Exporter en CSV ===
+output_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/mazan_part2_cleaned.csv"
+df.to_csv(output_path, index=False, encoding="utf-8")
 
-df['is_misogynistic'] = df['cleaned_text'].apply(detect_misogyny)
-
-# === Étape 6 : Conversion des dates ===
-df['created_at'] = pd.to_datetime(df['created_at'], errors='coerce')
-
-# === Étape 7 : Réorganiser les colonnes ===
-colonnes_finales = [
-    'created_at', 'text', 'cleaned_text',
-    'likes', 'retweets', 'period', 'label', 'is_misogynistic'
-]
-df = df[[col for col in colonnes_finales if col in df.columns]]
-
-# === Étape 8 : Export final ===
-df.to_csv("tweets_mazan_nettoyes_rgpd_misogynie.csv", index=False)
-
-print("✅ Fichier final exporté : tweets_mazan_nettoyes_rgpd_misogynie.csv")
+print(f"{len(df)} tweets nettoyés et enregistrés dans {output_path}")
