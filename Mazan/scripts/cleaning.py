@@ -4,7 +4,7 @@ import re
 import string
 
 # === 1. Charger le fichier JSONL ===
-input_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/Mazan_Tweets_part2.json"
+input_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/MAZAN_V3_2024-09-01_2025-05-29_tweets.json"
 
 with open(input_path, "r", encoding="utf-8") as f:
     tweets = [json.loads(line) for line in f if line.strip()]  # JSONL : 1 tweet par ligne
@@ -36,7 +36,7 @@ if colonnes_existantes:
     df = df.drop(columns=colonnes_existantes)
 
 # === 6. Exporter en CSV ===
-output_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/mazan_part2_cleaned.csv"
+output_path = "C:/Users/ULTRABOOK DELL/OneDrive - UPEC/Bureau/Mémoire M2/DataSets/Mazan/results/Mazan_V3_cleaned.csv"
 df.to_csv(output_path, index=False, encoding="utf-8")
 
 print(f"{len(df)} tweets nettoyés et enregistrés dans {output_path}")

@@ -6,17 +6,21 @@ from configparser import ConfigParser
 from random import randint
 import httpx
 
-MINIMUM_TWEETS = 500
+MINIMUM_TWEETS = 1000
 
 QUERY_GROUPS = {
-    "mazan_misogynie": [
-        '("mazan" OR "gisèle pelicot") ("pute" OR "sal*pe" OR "elle ment" OR "viol collectif" OR "femmes menteuses" OR "justice pour les hommes" OR "c’est faux" OR "elles exagèrent" OR "elle l’a cherché" OR "faut arrêter de croire les femmes") lang:fr'
+    "mazan_V4": [
+        '("mazan" OR "gisèle pelicot" OR "gisele pelicot" OR "#Mazan" OR "procès mazan" OR "viol collectif" OR "dominique pelicot" OR "culture du viol" OR "la victime") lang:fr'
+
     ]
 }
 
 PERIODS = [
-    ("2024-12-01", "2025-05-29")
+    ("2024-09-01", "2024-12-31"),
+    ("2025-01-01", "2025-03-31"),
+    ("2025-04-01", "2025-05-29"),
 ]
+
 
 config = ConfigParser()
 config.read(r"C:\Users\ULTRABOOK DELL\OneDrive - UPEC\Bureau\Mémoire M2\DataSets\LaManada\config.ini")
@@ -52,13 +56,12 @@ async def main():
                 tweet_count = 0
                 tweets = await get_tweets(query, since, until)
                 period_tweets = []
-                file_label = f"{label.upper()}_{since}_{until}_tweets.json"
+                file_label = f"{label.lower()}_all_periods.json"
 
                 while tweets and tweet_count < MINIMUM_TWEETS:
                     try:
                         for tweet in tweets:
                             text = tweet.text.lower()
-                            # Sécurité : le texte doit contenir une mention claire de l'affaire
                             if "mazan" in text or "gisèle pelicot" in text:
                                 tweet_json = {
                                     "id": tweet.id,
